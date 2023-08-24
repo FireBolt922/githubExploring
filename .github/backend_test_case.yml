@@ -1,0 +1,66 @@
+name: DjangoBackend TestCases
+
+on:
+  push
+
+jobs:
+  backend-tests:
+
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.8.3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Create Virtual Environment
+      run: python -m venv myenv
+    
+    - name: Cache myenv directory   # caching virtual env dir files
+      uses: actions/cache@v3
+      with:
+        path: myenv
+        key: ${{ runner.os }}-myenv-${{ hashFiles(env.CI_PYTHON_REQ_FILE_PATH) }}
+        restore-keys: |
+          ${{ runner.os }}-myenv-
+        
+    - name: Activate Virtual Environment
+      run: . myenv/bin/activate
+    
+    - name: Install Dependencies
+      run: pip install -r req.txt
+        
+    - name: Run Django migrations
+      run: |
+        cd backend
+        python manage.py migrate
+  
+    - name: Running Test cases
+      run: |
+        cd backend
+        coverage run --source='.' manage.py test --no-input --failfast
+        if [ -f ".coverage" ]; then
+          coverage report -m
+          coverage xml
+          coverage json -o coverage.json
+          TOTAL_COVERAGE=$(coverage report -m | tail -1 | awk '{print $NF}')
+          echo "Total Coverage: $TOTAL_COVERAGE"
+        fi
+      env:
+        CI: true
+    
+    - name: Upload coverage report to github artifacts     # for readme update
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: |
+          backend/coverage.xml
+          backend/coverage.json
+
+  clean-up:
+    runs-on: ubuntu-latest
+    needs: backend-tests
+    steps:
+    - name: Delete checked-out code
+      run: sudo rm -rf $GITHUB_WORKSPACE    # Delete worksapce code
