@@ -1,7 +1,7 @@
 name: DjangoBackend TestCases
 
 on:
-  push
+  [workflow_dispatch, push]
 
 jobs:
   backend-tests:
