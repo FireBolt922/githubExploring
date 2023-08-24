@@ -1,0 +1,9 @@
+.Python
+env
+venv
+.idea
+bin
+lib
+include
+.DS_Store
+.pyc
