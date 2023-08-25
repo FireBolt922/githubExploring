@@ -20,5 +20,5 @@ jobs:
         working-directory: ./todomvc
 
       - name: Server build
-        run: yarn run cypress:run"
+        run: yarn run cypress:run
         working-directory: ./todomvc
