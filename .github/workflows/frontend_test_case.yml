@@ -28,4 +28,4 @@ jobs:
           yarn global add serve
           serve -s build -l 3000 & yarn run cypress:run"
 
-        working-directory: ./frontend
+        working-directory: ./todomvc
