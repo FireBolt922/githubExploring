@@ -3,16 +3,29 @@ name: Cypress Tests
 on: [push]
 
 jobs:
-  cypress-run:
+  frontend:
+    name: Frontend Build and Test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v2
-      # Install NPM dependencies, cache them correctly
-      # and run all Cypress tests
-      - name: Cypress run
-        uses: cypress-io/github-action@v2
-        working-directory: ./todomvc
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          build: npm run build
-          start: npm start
+          node-version: "18" # Set the appropriate Node.js version
+
+      - name: Install Node.js dependencies
+        run: yarn
+        working-directory: ./frontend
+
+      - name: Build React project
+        run: yarn build
+        working-directory: ./todomvc
+
+      - name: Server build
+        run: |
+          yarn global add serve
+          serve -s build -l 3000 & yarn run cypress:run"
+
+        working-directory: ./frontend
